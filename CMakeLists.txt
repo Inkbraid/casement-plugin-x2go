@@ -20,7 +20,11 @@ add_library(x2go_core STATIC
     src/x2go/cursor.cpp
     src/x2go/frames.cpp
     src/x2go/image.cpp
-    src/x2go/kdrive.cpp)
+    src/x2go/kdrive.cpp
+    src/x2go/keyboard.cpp
+    src/x2go/known_hosts.cpp
+    src/x2go/options.cpp
+    src/x2go/server.cpp)
 target_include_directories(x2go_core PUBLIC src)
 target_link_libraries(x2go_core PUBLIC casement ZLIB::ZLIB OpenSSL::Crypto windowscodecs ole32 uuid
     ws2_32 crypt32 bcrypt user32 advapi32)
@@ -29,5 +33,8 @@ casement_test(unit_tests unit
     tests/unit/clipboard_tests.cpp
     tests/unit/frames_tests.cpp
     tests/unit/kdrive_tests.cpp
-    tests/unit/main.cpp)
+    tests/unit/keyboard_tests.cpp
+    tests/unit/known_hosts_tests.cpp
+    tests/unit/main.cpp
+    tests/unit/server_tests.cpp)
 target_link_libraries(unit_tests PRIVATE x2go_core)
