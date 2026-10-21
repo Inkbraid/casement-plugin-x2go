@@ -29,6 +29,10 @@ target_include_directories(x2go_core PUBLIC src)
 target_link_libraries(x2go_core PUBLIC casement ZLIB::ZLIB OpenSSL::Crypto windowscodecs ole32 uuid
     ws2_32 crypt32 bcrypt user32 advapi32)
 
+casement_plugin_executable(casement-x2go src/main.cpp src/x2go/session.cpp src/x2go/ssh.cpp)
+target_link_libraries(casement-x2go PRIVATE x2go_core libssh2::libssh2)
+target_compile_definitions(casement-x2go PRIVATE X2GO_PLUGIN_VERSION="${PROJECT_VERSION}")
+
 casement_test(unit_tests unit
     tests/unit/clipboard_tests.cpp
     tests/unit/frames_tests.cpp

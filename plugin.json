@@ -1,0 +1,30 @@
+{
+  "format": "casement-plugin",
+  "version": 1,
+  "id": "x2go",
+  "name": "X2Go",
+  "description": "X2Go desktop sessions (KDrive) over SSH",
+  "icon": "icon.png",
+  "program": "casement-x2go.exe",
+  "args": [],
+  "homepage": "https://github.com/Inkbraid/casement-plugin-x2go",
+  "capabilities": ["password", "clipboard", "cursor", "resize"],
+  "connections": [
+    {
+      "scheme": "x2go",
+      "name": "X2Go (KDrive)",
+      "fields": [
+        { "name": "user", "label": "User", "part": "user", "type": "text", "placeholder": "your Windows user name" },
+        { "name": "host", "label": "Server", "part": "host", "type": "text", "required": true, "placeholder": "server.example.com" },
+        { "name": "port", "label": "SSH port", "part": "port", "type": "number", "placeholder": "22" },
+        { "name": "command", "label": "Desktop", "part": "query", "type": "text", "default": "XFCE", "placeholder": "XFCE, LXDE, LXQT, MATE, KDE, GNOME or a program to run" },
+        { "name": "layout", "label": "Keyboard layout", "part": "query", "type": "text", "placeholder": "as in Windows; or us, de, fr(oss), …" },
+        { "name": "resume", "label": "Resume a suspended session", "part": "query", "type": "flag", "default": true },
+        { "name": "close", "label": "Closing the tab", "part": "query", "type": "choice", "default": "suspend",
+          "choices": [ { "value": "suspend", "label": "Suspends the session" }, { "value": "terminate", "label": "Ends the session" } ] },
+        { "name": "hostkey", "label": "Host key fingerprint", "part": "query", "type": "text", "placeholder": "SHA256:…" },
+        { "name": "key", "label": "Private key file", "part": "query", "type": "text", "placeholder": "%USERPROFILE%\\.ssh\\id_ed25519" }
+      ]
+    }
+  ]
+}
