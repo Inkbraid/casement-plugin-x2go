@@ -42,3 +42,8 @@ casement_test(unit_tests unit
     tests/unit/main.cpp
     tests/unit/server_tests.cpp)
 target_link_libraries(unit_tests PRIVATE x2go_core)
+
+casement_test(e2e_tests e2e tests/e2e/x2go_tests.cpp)
+target_link_libraries(e2e_tests PRIVATE casement_sim)
+target_compile_definitions(e2e_tests PRIVATE PLUGIN_EXE=L"$<TARGET_FILE_NAME:casement-x2go>")
+add_dependencies(e2e_tests casement-x2go)
