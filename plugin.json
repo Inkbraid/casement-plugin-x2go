@@ -19,7 +19,7 @@
         { "name": "port", "label": "SSH port", "part": "port", "type": "number", "placeholder": "22" },
         { "name": "command", "label": "Desktop", "part": "query", "type": "text", "default": "XFCE", "placeholder": "XFCE, LXDE, LXQT, MATE, KDE, GNOME or a program to run" },
         { "name": "layout", "label": "Keyboard layout", "part": "query", "type": "text", "placeholder": "as in Windows; or us, de, fr(oss), …" },
-        { "name": "resume", "label": "Resume a suspended session", "part": "query", "type": "flag", "default": true },
+        { "name": "new", "label": "Always start a new session", "part": "query", "type": "flag" },
         { "name": "close", "label": "Closing the tab", "part": "query", "type": "choice", "default": "suspend",
           "choices": [ { "value": "suspend", "label": "Suspends the session" }, { "value": "terminate", "label": "Ends the session" } ] },
         { "name": "hostkey", "label": "Host key fingerprint", "part": "query", "type": "text", "placeholder": "SHA256:…" },

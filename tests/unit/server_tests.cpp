@@ -184,7 +184,7 @@ TEST(normalizes_desktop_commands) {
 
 TEST(reads_connection_settings) {
     std::string error;
-    auto o = parse_options("x2go://ann@server.example.test:2222?command=lxqt&layout=de(nodeadkeys)&resume&close="
+    auto o = parse_options("x2go://ann@server.example.test:2222?command=lxqt&layout=de(nodeadkeys)&new&close="
                            "terminate&hostkey=SHA256%3ATAiBO%2Fs3yDG4w9T2qXFdss0mBLD0cIszJ%2FCUzboewuM&key=C%3A%5Ckeys%5Cid",
                            "", error);
     REQUIRE(o);
@@ -193,7 +193,7 @@ TEST(reads_connection_settings) {
     CHECK_EQ(o->user, std::string("ann"));
     CHECK_EQ(o->command, std::string("LXQt"));
     CHECK_EQ(o->layout, std::string("de(nodeadkeys)"));
-    CHECK(o->resume);
+    CHECK(!o->resume);
     CHECK(o->terminate_on_close);
     CHECK_EQ(o->hostkey, std::string("SHA256:TAiBO/s3yDG4w9T2qXFdss0mBLD0cIszJ/CUzboewuM"));
     CHECK_EQ(o->key, std::string("C:\\keys\\id"));
@@ -204,7 +204,7 @@ TEST(reads_connection_settings) {
     CHECK_EQ(d->user, std::string("bob"));
     CHECK_EQ(d->command, std::string("XFCE"));
     CHECK(d->layout.empty());
-    CHECK(!d->resume);
+    CHECK(d->resume);
     CHECK(!d->terminate_on_close);
     CHECK(d->hostkey.empty());
     // Casement's user name wins over the address's.

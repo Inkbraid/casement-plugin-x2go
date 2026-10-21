@@ -266,7 +266,7 @@ bool desktop_shows(Run& r) {
 TEST(password_sign_in_and_desktop) {
     auto cfg = configured();
     if (!cfg) return;
-    Run r(*cfg, cfg->address("&close=terminate"), cfg->password, cfg->known_hosts);
+    Run r(*cfg, cfg->address("&new&close=terminate"), cfg->password, cfg->known_hosts);
     REQUIRE(r.wait_state(60s));
     REQUIRE(*r.state == "connected");
     CHECK(r.log_has("signed in as " + cfg->user + " with a password"));
@@ -318,7 +318,7 @@ TEST(key_sign_in) {
     auto cfg = configured();
     if (!cfg) return;
     {
-        Run r(*cfg, cfg->address("&close=terminate&key=" + encode(cfg->key)), "", cfg->known_hosts);
+        Run r(*cfg, cfg->address("&new&close=terminate&key=" + encode(cfg->key)), "", cfg->known_hosts);
         REQUIRE(r.wait_state(60s));
         REQUIRE(*r.state == "connected");
         CHECK(r.log_has("with the key"));
@@ -328,7 +328,7 @@ TEST(key_sign_in) {
     }
     if (cfg->key_encrypted.empty()) return;
     // Casement's password opens a key protected by a passphrase.
-    Run r(*cfg, cfg->address("&close=terminate&key=" + encode(cfg->key_encrypted)), cfg->passphrase,
+    Run r(*cfg, cfg->address("&new&close=terminate&key=" + encode(cfg->key_encrypted)), cfg->passphrase,
           cfg->known_hosts);
     REQUIRE(r.wait_state(60s));
     REQUIRE(*r.state == "connected");
@@ -339,13 +339,13 @@ TEST(key_sign_in) {
 TEST(wrong_password_is_auth_failed) {
     auto cfg = configured();
     if (!cfg) return;
-    Run r(*cfg, cfg->address("&close=terminate"), "not-the-password", cfg->known_hosts);
+    Run r(*cfg, cfg->address("&new&close=terminate"), "not-the-password", cfg->known_hosts);
     REQUIRE(r.wait_state(60s));
     CHECK_EQ(*r.state, std::string("auth_failed"));
     auto code = r.exit_code(5000ms);
     CHECK(code && *code == 0);
 
-    Run none(*cfg, cfg->address("&close=terminate"), "", cfg->known_hosts);
+    Run none(*cfg, cfg->address("&new&close=terminate"), "", cfg->known_hosts);
     REQUIRE(none.wait_state(60s));
     CHECK_EQ(*none.state, std::string("auth_failed"));
 }
@@ -356,7 +356,7 @@ TEST(unknown_host_key_fails_and_a_pinned_key_works) {
     const std::string empty = empty_known_hosts();
     std::string fingerprint;
     {
-        Run r(*cfg, cfg->address("&close=terminate"), cfg->password, empty);
+        Run r(*cfg, cfg->address("&new&close=terminate"), cfg->password, empty);
         REQUIRE(r.wait_state(60s));
         CHECK_EQ(*r.state, std::string("failed"));
         auto at = r.state_text.find("hostkey=SHA256:");
@@ -367,21 +367,21 @@ TEST(unknown_host_key_fails_and_a_pinned_key_works) {
         CHECK(code && *code == 1);
     }
     {
-        Run r(*cfg, cfg->address("&close=terminate&hostkey=" + encode(fingerprint)), cfg->password, empty);
+        Run r(*cfg, cfg->address("&new&close=terminate&hostkey=" + encode(fingerprint)), cfg->password, empty);
         REQUIRE(r.wait_state(60s));
         CHECK_EQ(*r.state, std::string("connected"));
         CHECK(r.log_has("matches the pinned fingerprint"));
     }
     if (!cfg->rsa_fingerprint.empty()) {
         // A pin of another of the server's keys than the one it shows first.
-        Run r(*cfg, cfg->address("&close=terminate&hostkey=" + encode(cfg->rsa_fingerprint)), cfg->password, empty);
+        Run r(*cfg, cfg->address("&new&close=terminate&hostkey=" + encode(cfg->rsa_fingerprint)), cfg->password, empty);
         REQUIRE(r.wait_state(60s));
         CHECK_EQ(*r.state, std::string("connected"));
         CHECK(r.log_has("host key ssh-rsa " + cfg->rsa_fingerprint + " matches the pinned fingerprint"));
     }
     std::string wrong = fingerprint;
     wrong[10] = wrong[10] == 'A' ? 'B' : 'A';
-    Run r(*cfg, cfg->address("&close=terminate&hostkey=" + encode(wrong)), cfg->password, cfg->known_hosts);
+    Run r(*cfg, cfg->address("&new&close=terminate&hostkey=" + encode(wrong)), cfg->password, cfg->known_hosts);
     REQUIRE(r.wait_state(60s));
     CHECK_EQ(*r.state, std::string("failed"));
     CHECK(r.state_text.find("WARNING") != std::string::npos);
@@ -392,7 +392,7 @@ TEST(disconnect_then_reconnect_resumes) {
     if (!cfg) return;
     std::string session;
     {
-        Run r(*cfg, cfg->address("&resume"), cfg->password, cfg->known_hosts);
+        Run r(*cfg, cfg->address("&new"), cfg->password, cfg->known_hosts);
         REQUIRE(r.wait_state(60s));
         REQUIRE(*r.state == "connected");
         REQUIRE(desktop_shows(r));
@@ -407,7 +407,7 @@ TEST(disconnect_then_reconnect_resumes) {
         CHECK_EQ(*code, 0ul);
         CHECK(r.log_has("suspending session " + session));
     }
-    Run r(*cfg, cfg->address("&resume&close=terminate"), cfg->password, cfg->known_hosts);
+    Run r(*cfg, cfg->address("&close=terminate"), cfg->password, cfg->known_hosts);
     REQUIRE(r.wait_state(60s));
     REQUIRE(*r.state == "connected");
     CHECK(r.log_has("resumed session " + session));
@@ -420,7 +420,7 @@ TEST(close_terminate_ends_the_session) {
     if (!cfg) return;
     std::string first;
     {
-        Run r(*cfg, cfg->address("&resume&close=terminate"), cfg->password, cfg->known_hosts);
+        Run r(*cfg, cfg->address("&close=terminate"), cfg->password, cfg->known_hosts);
         REQUIRE(r.wait_state(60s));
         REQUIRE(*r.state == "connected");
         CHECK(r.pump(20s, [&] { return r.frames > 0; }));
@@ -432,7 +432,7 @@ TEST(close_terminate_ends_the_session) {
         CHECK(r.log_has("terminating session " + first));
     }
     // Nothing to resume: the session is gone, so a new one starts.
-    Run r(*cfg, cfg->address("&resume&close=terminate"), cfg->password, cfg->known_hosts);
+    Run r(*cfg, cfg->address("&close=terminate"), cfg->password, cfg->known_hosts);
     REQUIRE(r.wait_state(60s));
     REQUIRE(*r.state == "connected");
     CHECK(r.log_has("no suspended session"));

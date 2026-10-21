@@ -49,7 +49,7 @@ std::optional<Options> parse_options(std::string_view address, std::string_view 
         }
         o.layout = *l;
     }
-    o.resume = a->flag("resume");
+    o.resume = !a->flag("new");
     if (const std::string* c = a->param("close"); c && !c->empty()) {
         if (*c == "terminate") {
             o.terminate_on_close = true;

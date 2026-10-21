@@ -1,5 +1,5 @@
 // A connection's settings, from its address:
-//   x2go://[user@]host[:port]?command=XFCE&layout=de&resume&close=suspend&hostkey=SHA256:...&key=C:\...
+//   x2go://[user@]host[:port]?command=XFCE&layout=de&new&close=suspend&hostkey=SHA256:...&key=C:\...
 
 #pragma once
 
@@ -19,8 +19,9 @@ struct Options {
     std::string command = "XFCE";
     /// XKB layout with optional variant; empty: from the Windows layout.
     std::string layout;
-    /// Resume the newest suspended session started with the same command.
-    bool resume = false;
+    /// Resume the newest suspended session started with the same command,
+    /// unless the address asks for a new session ("new").
+    bool resume = true;
     /// What closing the tab does to the session.
     bool terminate_on_close = false;
     /// A pinned host key: "SHA256:" and the unpadded base64 of the hash.

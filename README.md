@@ -47,7 +47,7 @@ then restart Casement. Each release also carries the matching source code
 ## Connections
 
 ```
-x2go://[user@]server[:port][?command=…][&layout=…][&resume][&close=suspend|terminate][&hostkey=SHA256:…][&key=…]
+x2go://[user@]server[:port][?command=…][&layout=…][&new][&close=suspend|terminate][&hostkey=SHA256:…][&key=…]
 ```
 
 | Field | In the address | Meaning |
@@ -57,7 +57,7 @@ x2go://[user@]server[:port][?command=…][&layout=…][&resume][&close=suspend|t
 | SSH port | `:port` | 22 unless given. |
 | Desktop | `command=` | What runs in the session, passed to the server's `x2goruncommand`: a desktop name (`XFCE`, `LXDE`, `LXQT`, `MATE`, `KDE`, `GNOME`, `CINNAMON`, `UNITY`, `TRINITY`, `ICEWM`, `OPENBOX`, `TERMINAL`; case doesn't matter, except that `openbox` and `icewm` in lower case run those programs) or a program with arguments, such as `/usr/bin/xterm -bg black`. `XFCE` when empty. Letters, digits, spaces and `. _ / + = : , @ % -` only; anything else belongs in a script on the server. |
 | Keyboard layout | `layout=` | The X keyboard layout for the session, with an optional variant: `us`, `de`, `fr(oss)`, `de(nodeadkeys)`. When empty, the layout matching the Windows keyboard layout, or `us`. |
-| Resume a suspended session | `resume` | Resume your newest suspended KDrive session that was started with the same desktop, instead of starting a new one. On in the connection dialog. |
+| Always start a new session | `new` | Start a new session even when one can be resumed. Without it, the plugin resumes your newest suspended KDrive session that was started with the same desktop, and starts a new one only when there is none. |
 | Closing the tab | `close=` | `suspend` (default): the session keeps running on the server and can be resumed. `terminate`: the session ends. |
 | Host key fingerprint | `hostkey=` | Trust the server whose host key has this fingerprint, as `ssh-keygen -lf` prints it (`SHA256:…`), instead of looking it up in `known_hosts`. |
 | Private key file | `key=` | An OpenSSH or PEM private key; `%VARIABLES%` and a leading `~` are expanded. |
@@ -65,9 +65,9 @@ x2go://[user@]server[:port][?command=…][&layout=…][&resume][&close=suspend|t
 Examples:
 
 ```
-x2go://ann@build.example.com?command=XFCE&resume
+x2go://ann@build.example.com?command=XFCE
 x2go://ann@10.0.0.5:2222?command=%2Fusr%2Fbin%2Fxterm&layout=de&close=terminate
-x2go://ann@build.example.com?resume&hostkey=SHA256:Bx%2FoMqjQz9twH07lwPyoDE0AznE98f8ZxuKi6fC8Z5w
+x2go://ann@build.example.com?new&hostkey=SHA256:Bx%2FoMqjQz9twH07lwPyoDE0AznE98f8ZxuKi6fC8Z5w
 ```
 
 The password comes from Casement, saved or typed when the plugin reports
@@ -82,7 +82,7 @@ keyboard-interactive sign-in, and as the passphrase of a protected key.
    then with `id_ed25519`, `id_ecdsa` and `id_rsa` from `%USERPROFILE%\.ssh`,
    then with the password (password, then keyboard-interactive).
 2. **The session.** In exec channels on that connection, through a login
-   shell as x2goclient does it: with `resume`, `x2golistsessions` and, for
+   shell as x2goclient does it: unless `new` is set, `x2golistsessions` and, for
    the newest suspended KDrive session (type `K`) with the same desktop,
    `x2goresume-session`; otherwise `x2gostartagent … K <desktop> …` for a
    new session, at the tab's size if Casement has sent it by then.
@@ -140,8 +140,6 @@ What Casement sees as `state`:
   session from elsewhere ends this connection: X2Go's scripts end the SSH
   connection that last started or resumed a session. A session that was
   started but never connected to suspends itself after 30 seconds.
-  `resume` is a flag: an address typed by hand resumes only when it has
-  `resume` in it.
 - **Keyboard.** The server types characters with the layout from `layout=`
   (or the Windows layout at start), not the one Windows uses at the moment.
   Right Alt is AltGr on layouts that have it (most outside the US) and Alt
@@ -254,7 +252,7 @@ found.
 - **By hand:** `casement-sim` plays Casement's side for one connection:
 
   ```
-  casement-sim casement-x2go.exe "x2go://ann@server?command=XFCE&resume" --password … --seconds 20 --out .
+  casement-sim casement-x2go.exe "x2go://ann@server?command=XFCE" --password … --seconds 20 --out .
   ```
 
 ## Protocol v2

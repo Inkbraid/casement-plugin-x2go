@@ -7,7 +7,7 @@
   `cursor`, key, pointer and wheel input, clipboard text both ways,
   `resize`. Capabilities: `password`, `clipboard`, `cursor`, `resize`.
 - `x2go://[user@]server[:port]` connections with `command`, `layout`,
-  `resume`, `close`, `hostkey` and `key` (`plugin.json`).
+  `new`, `close`, `hostkey` and `key` (`plugin.json`).
 - SSH with libssh2: sign-in with a key file (its passphrase from Casement's
   password), Pageant or the Windows OpenSSH agent, the default keys, then
   password and keyboard-interactive; `auth_failed` for a missing or refused
