@@ -1,0 +1,59 @@
+name: Release
+
+# Pushing a tag like v0.1.0 builds and tests the plugin and publishes a
+# release with the zip. GitHub adds the tag's source archives to every
+# release, which keeps each binary next to its corresponding source.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  # The vcpkg commit of the builtin-baseline in vcpkg.json; keep them in step.
+  VCPKG_COMMIT_ID: "9e593bb18ea69cc5095e012465dcd675a822ed0d"
+  VCPKG_BINARY_SOURCES: "clear;files,C:\\vcpkg-binary-cache,readwrite"
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Check the tag matches the version
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path CMakeLists.txt -Pattern 'project\([^)]*VERSION ([0-9.]+)').Matches[0].Groups[1].Value
+          if ("v$version" -ne "${{ github.ref_name }}") { throw "tag ${{ github.ref_name }} != version $version" }
+      - name: Cache the vcpkg builds
+        uses: actions/cache@v4
+        with:
+          path: C:\vcpkg-binary-cache
+          key: vcpkg-x64-windows-static-${{ env.VCPKG_COMMIT_ID }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-x64-windows-static-${{ env.VCPKG_COMMIT_ID }}-
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: C:\vcpkg
+          vcpkgGitCommitId: ${{ env.VCPKG_COMMIT_ID }}
+      - name: Configure
+        shell: bash
+        run: |
+          mkdir -p /c/vcpkg-binary-cache
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_TARGET_TRIPLET=x64-windows-static
+      - run: cmake --build build
+      - run: ctest --test-dir build --output-on-failure -L unit
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/x2go | Out-Null
+          Copy-Item build/casement-x2go.exe, plugin.json, icon.png, LICENSE, README.md, CHANGELOG.md dist/x2go/
+          Compress-Archive -Path dist/x2go -DestinationPath "casement-x2go-${{ github.ref_name }}-windows-x64.zip"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: casement-x2go-${{ github.ref_name }}-windows-x64.zip
+          generate_release_notes: true
