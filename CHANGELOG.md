@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.1.0 (2026-10-23)
 
 - Casement plugin protocol v1 through the shared Casement layer: `hello`,
   `connect`, `state`, shared-memory surfaces with `frame`/`frame_ack`,
